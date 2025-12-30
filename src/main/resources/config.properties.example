@@ -1,0 +1,10 @@
+# Database Configuration
+db.url=jdbc:mysql://localhost:3306/ecommerce?useSSL=false&serverTimezone=UTC&characterEncoding=utf8&allowPublicKeyRetrieval=true
+db.username=root
+db.password=YOUR_DB_PASSWORD_HERE
+
+# Email Configuration
+email.smtp.host=smtp.qq.com
+email.smtp.port=587
+email.username=YOUR_EMAIL@qq.com
+email.password=YOUR_SMTP_AUTH_CODE_HERE
