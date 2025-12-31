@@ -7,20 +7,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>购物车</title>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
 </head>
 <body>
     <nav>
         <div class="container">
-            <a href="index.jsp" class="logo">🛒 电商平台</a>
+            <a href="${pageContext.request.contextPath}/index.jsp" class="logo">🛒 电商平台</a>
             <ul>
-                <li><a href="products">商品列表</a></li>
-                <li><a href="cart">购物车</a></li>
-                <li><a href="order">我的订单</a></li>
+                <li><a href="${pageContext.request.contextPath}/products">商品列表</a></li>
+                <li><a href="${pageContext.request.contextPath}/cart">购物车</a></li>
+                <li><a href="${pageContext.request.contextPath}/order">我的订单</a></li>
                 <c:if test="${sessionScope.role == 'admin'}">
-                    <li><a href="admin/dashboard.jsp">管理后台</a></li>
+                    <li><a href="${pageContext.request.contextPath}/admin/dashboard">管理后台</a></li>
                 </c:if>
-                <li><a href="auth?action=logout">退出</a></li>
+                <li><a href="${pageContext.request.contextPath}/auth?action=logout">退出</a></li>
             </ul>
         </div>
     </nav>
@@ -45,7 +45,7 @@
                             <td>${item.product.name}</td>
                             <td>¥<fmt:formatNumber value="${item.product.price}" pattern="#,##0.00"/></td>
                             <td>
-                                <form action="cart" method="post" style="display: inline;">
+                                <form action="${pageContext.request.contextPath}/cart" method="post" style="display: inline;">
                                     <input type="hidden" name="action" value="update">
                                     <input type="hidden" name="cartItemId" value="${item.id}">
                                     <input type="number" name="quantity" value="${item.quantity}" 
@@ -56,7 +56,7 @@
                             </td>
                             <td>¥<fmt:formatNumber value="${item.subtotal}" pattern="#,##0.00"/></td>
                             <td>
-                                <form action="cart" method="post" style="display: inline;">
+                                <form action="${pageContext.request.contextPath}/cart" method="post" style="display: inline;">
                                     <input type="hidden" name="action" value="remove">
                                     <input type="hidden" name="cartItemId" value="${item.id}">
                                     <button type="submit" class="btn btn-danger" 
@@ -73,7 +73,7 @@
             <div class="card" style="margin-top: 20px;">
                 <div style="text-align: right;">
                     <h3>总计：¥<fmt:formatNumber value="${total}" pattern="#,##0.00"/></h3>
-                    <a href="order?action=checkout" class="btn btn-success" 
+                    <a href="${pageContext.request.contextPath}/order?action=checkout" class="btn btn-success" 
                        style="margin-top: 10px; font-size: 1.1rem; padding: 12px 30px;">
                         去结算
                     </a>
@@ -84,7 +84,7 @@
         <c:if test="${empty cartItems}">
             <div class="card" style="text-align: center; padding: 50px;">
                 <p style="font-size: 1.2rem; color: #7f8c8d; margin-bottom: 20px;">购物车是空的</p>
-                <a href="products" class="btn btn-primary">去购物</a>
+                <a href="${pageContext.request.contextPath}/products" class="btn btn-primary">去购物</a>
             </div>
         </c:if>
     </div>

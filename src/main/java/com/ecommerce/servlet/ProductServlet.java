@@ -8,9 +8,13 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
+import com.ecommerce.dao.BrowsingHistoryDAO;
 import com.ecommerce.dao.ProductDAO;
+import com.ecommerce.dao.SystemLogDAO;
 import com.ecommerce.model.Product;
+import com.ecommerce.model.User;
 
 /**
  * 商品Servlet - 处理商品浏览、搜索
@@ -18,6 +22,8 @@ import com.ecommerce.model.Product;
 @WebServlet("/products")
 public class ProductServlet extends HttpServlet {
     private ProductDAO productDAO = new ProductDAO();
+    private BrowsingHistoryDAO browsingHistoryDAO = new BrowsingHistoryDAO();
+    private SystemLogDAO systemLogDAO = new SystemLogDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
@@ -76,6 +82,18 @@ public class ProductServlet extends HttpServlet {
             throws ServletException, IOException {
         int productId = Integer.parseInt(request.getParameter("id"));
         Product product = productDAO.getProductById(productId);
+        
+        // 记录浏览历史（如果用户已登录）
+        HttpSession session = request.getSession();
+        User user = (User) session.getAttribute("user");
+        if (user != null && product != null) {
+            browsingHistoryDAO.recordView(user.getId(), productId);
+            // 记录系统日志
+            systemLogDAO.log(user.getId(), user.getUsername(), "VIEW_PRODUCT", 
+                "浏览商品: " + product.getName() + " (ID: " + productId + ")",
+                request.getRemoteAddr(), request.getHeader("User-Agent"));
+        }
+        
         request.setAttribute("product", product);
         request.getRequestDispatcher("productDetail.jsp").forward(request, response);
     }

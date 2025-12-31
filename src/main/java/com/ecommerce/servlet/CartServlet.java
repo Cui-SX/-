@@ -69,13 +69,19 @@ public class CartServlet extends HttpServlet {
      */
     private void handleAdd(HttpServletRequest request, HttpServletResponse response, int userId) 
             throws IOException {
-        int productId = Integer.parseInt(request.getParameter("productId"));
-        int quantity = Integer.parseInt(request.getParameter("quantity"));
-        
-        if (cartDAO.addToCart(userId, productId, quantity)) {
-            response.sendRedirect("cart");
-        } else {
-            response.sendRedirect("products?error=添加失败");
+        try {
+            int productId = Integer.parseInt(request.getParameter("productId"));
+            int quantity = Integer.parseInt(request.getParameter("quantity"));
+            
+            if (cartDAO.addToCart(userId, productId, quantity)) {
+                response.sendRedirect(request.getContextPath() + "/cart");
+            } else {
+                System.err.println("[CartServlet] 添加失败 - userId: " + userId + ", productId: " + productId + ", quantity: " + quantity);
+                response.sendRedirect(request.getContextPath() + "/products?error=add_failed");
+            }
+        } catch (NumberFormatException e) {
+            System.err.println("[CartServlet] 参数解析错误: " + e.getMessage());
+            response.sendRedirect(request.getContextPath() + "/products?error=invalid_params");
         }
     }
 
@@ -88,7 +94,7 @@ public class CartServlet extends HttpServlet {
         int quantity = Integer.parseInt(request.getParameter("quantity"));
         
         cartDAO.updateCartItemQuantity(cartItemId, quantity);
-        response.sendRedirect("cart");
+        response.sendRedirect(request.getContextPath() + "/cart");
     }
 
     /**
@@ -99,6 +105,6 @@ public class CartServlet extends HttpServlet {
         int cartItemId = Integer.parseInt(request.getParameter("cartItemId"));
         
         cartDAO.removeFromCart(cartItemId);
-        response.sendRedirect("cart");
+        response.sendRedirect(request.getContextPath() + "/cart");
     }
 }

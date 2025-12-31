@@ -12,12 +12,12 @@
 <body>
     <nav>
         <div class="container">
-            <a href="index.jsp" class="logo">🛒 电商平台</a>
+            <a href="${pageContext.request.contextPath}/" class="logo">🛒 电商平台</a>
             <ul>
-                <li><a href="products">商品列表</a></li>
-                <li><a href="cart">购物车</a></li>
-                <li><a href="order">我的订单</a></li>
-                <li><a href="auth?action=logout">退出</a></li>
+                <li><a href="${pageContext.request.contextPath}/products">商品列表</a></li>
+                <li><a href="${pageContext.request.contextPath}/cart">购物车</a></li>
+                <li><a href="${pageContext.request.contextPath}/order">我的订单</a></li>
+                <li><a href="${pageContext.request.contextPath}/auth?action=logout">退出</a></li>
             </ul>
         </div>
     </nav>
@@ -54,7 +54,7 @@
 
         <div class="card" style="margin-top: 20px;">
             <h3>配送信息</h3>
-            <form action="order" method="post" style="margin-top: 20px;">
+            <form action="${pageContext.request.contextPath}/order" method="post" style="margin-top: 20px;">
                 <input type="hidden" name="action" value="place">
                 
                 <div class="form-group">
@@ -67,7 +67,7 @@
                     <button type="submit" class="btn btn-success" style="font-size: 1.1rem; padding: 12px 30px;">
                         提交订单
                     </button>
-                    <a href="cart" class="btn" style="background-color: #95a5a6; color: white; margin-left: 10px;">
+                    <a href="${pageContext.request.contextPath}/cart" class="btn" style="background-color: #95a5a6; color: white; margin-left: 10px;">
                         返回购物车
                     </a>
                 </div>

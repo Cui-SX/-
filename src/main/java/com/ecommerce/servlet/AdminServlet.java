@@ -14,10 +14,14 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.Part;
 
+import com.ecommerce.dao.BrowsingHistoryDAO;
 import com.ecommerce.dao.OrderDAO;
 import com.ecommerce.dao.ProductDAO;
+import com.ecommerce.dao.SystemLogDAO;
+import com.ecommerce.model.BrowsingHistory;
 import com.ecommerce.model.Order;
 import com.ecommerce.model.Product;
+import com.ecommerce.model.SystemLog;
 import com.ecommerce.model.User;
 
 /**
@@ -28,6 +32,8 @@ import com.ecommerce.model.User;
 public class AdminServlet extends HttpServlet {
     private ProductDAO productDAO = new ProductDAO();
     private OrderDAO orderDAO = new OrderDAO();
+    private BrowsingHistoryDAO browsingHistoryDAO = new BrowsingHistoryDAO();
+    private SystemLogDAO systemLogDAO = new SystemLogDAO();
 
     private boolean isAdminOrSalesManager(User user) {
         return user != null && (user.isAdmin() || "sales_manager".equals(user.getRole()));
@@ -59,15 +65,89 @@ public class AdminServlet extends HttpServlet {
             handleProductEdit(request, response);
         } else if ("/stats".equals(pathInfo) || "/salesStats.jsp".equals(pathInfo)) {
             handleStats(request, response);
+        } else if ("/history".equals(pathInfo)) {
+            handleBrowsingHistory(request, response);
+        } else if ("/logs".equals(pathInfo)) {
+            handleSystemLogs(request, response);
         } else {
             System.out.println("AdminServlet - 未知路径: " + pathInfo);
         }
     }
 
+    private void handleBrowsingHistory(HttpServletRequest request, HttpServletResponse response) 
+            throws ServletException, IOException {
+        String username = request.getParameter("username");
+        List<BrowsingHistory> historyList;
+        
+        if (username != null && !username.trim().isEmpty()) {
+            historyList = browsingHistoryDAO.getHistoryByUsername(username, 200);
+            request.setAttribute("searchUsername", username);
+        } else {
+            historyList = browsingHistoryDAO.getAllHistory(200);
+        }
+        
+        request.setAttribute("historyList", historyList);
+        request.getRequestDispatcher("/WEB-INF/admin/browsingHistory.jsp").forward(request, response);
+    }
+
+    private void handleSystemLogs(HttpServletRequest request, HttpServletResponse response) 
+            throws ServletException, IOException {
+        String action = request.getParameter("action");
+        String username = request.getParameter("username");
+        String startDate = request.getParameter("startDate");
+        String endDate = request.getParameter("endDate");
+        
+        List<SystemLog> logs;
+        
+        if (username != null && !username.trim().isEmpty()) {
+            logs = systemLogDAO.getLogsByUsername(username, 500);
+            request.setAttribute("searchUsername", username);
+        } else if (action != null && !action.trim().isEmpty()) {
+            logs = systemLogDAO.getLogsByAction(action, 500);
+            request.setAttribute("searchAction", action);
+        } else if ((startDate != null && !startDate.isEmpty()) || (endDate != null && !endDate.isEmpty())) {
+            logs = systemLogDAO.getLogsByDateRange(startDate, endDate, 500);
+            request.setAttribute("startDate", startDate);
+            request.setAttribute("endDate", endDate);
+        } else {
+            logs = systemLogDAO.getAllLogs(500);
+        }
+        
+        request.setAttribute("logs", logs);
+        request.getRequestDispatcher("/WEB-INF/admin/systemLogs.jsp").forward(request, response);
+    }
+
     private void handleStats(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
+        // 基本统计数据
         Map<String, Object> stats = orderDAO.getSalesStatistics();
         request.setAttribute("stats", stats);
+        
+        // 处理订单查询
+        String username = request.getParameter("username");
+        String startDate = request.getParameter("startDate");
+        String endDate = request.getParameter("endDate");
+        
+        // 如果有任何查询条件
+        if ((username != null && !username.trim().isEmpty()) || 
+            (startDate != null && !startDate.trim().isEmpty()) || 
+            (endDate != null && !endDate.trim().isEmpty())) {
+            
+            List<Order> searchOrders = orderDAO.getOrdersByFilters(username, null, null, startDate, endDate);
+            request.setAttribute("searchOrders", searchOrders);
+            request.setAttribute("searchPerformed", true);
+            request.setAttribute("searchUsername", username);
+            request.setAttribute("searchStartDate", startDate);
+            request.setAttribute("searchEndDate", endDate);
+            
+            // 计算查询结果的总金额
+            double totalAmount = 0;
+            for (Order order : searchOrders) {
+                totalAmount += order.getTotalAmount();
+            }
+            request.setAttribute("searchTotalAmount", totalAmount);
+        }
+        
         request.getRequestDispatcher("/WEB-INF/admin/salesStats.jsp").forward(request, response);
     }
 

@@ -16,12 +16,32 @@ sudo mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_passwo
 
 # 导入数据
 echo "正在导入数据库结构..."
-# 确保 schema.sql 在当前目录下
-if [ -f "schema.sql" ]; then
-    sudo mysql -u root -pRoot123456 < schema.sql
+
+DB_USER="root"
+DB_PASS="Root123456"
+DB_NAME="ecommerce"
+
+# 优先使用安全初始化脚本（不删除现有数据）
+if [ -f "database/init_safe.sql" ]; then
+    echo "使用安全初始化脚本 (不删除现有数据)..."
+    sudo mysql -u $DB_USER -p$DB_PASS < database/init_safe.sql
+elif [ -f "init_safe.sql" ]; then
+    echo "使用安全初始化脚本 (不删除现有数据)..."
+    sudo mysql -u $DB_USER -p$DB_PASS < init_safe.sql
+elif [ -f "database/schema.sql" ]; then
+    echo "警告: 使用 schema.sql 会删除所有现有数据！"
+    echo "导入 database/schema.sql..."
+    sudo mysql -u $DB_USER -p$DB_PASS < database/schema.sql
+    # 导入新功能表
+    if [ -f "database/new_features.sql" ]; then
+        echo "导入 database/new_features.sql..."
+        sudo mysql -u $DB_USER -p$DB_PASS $DB_NAME < database/new_features.sql
+    fi
+elif [ -f "schema.sql" ]; then
+    echo "警告: 使用 schema.sql 会删除所有现有数据！"
+    sudo mysql -u $DB_USER -p$DB_PASS < schema.sql
 else
-    echo "错误: 找不到 schema.sql 文件！"
-    exit 1
+    echo "警告: 找不到数据库初始化文件，跳过数据库导入。"
 fi
 
 # 3. 部署 WAR 包

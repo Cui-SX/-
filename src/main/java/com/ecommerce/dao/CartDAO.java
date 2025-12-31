@@ -64,16 +64,21 @@ public class CartDAO {
                 PreparedStatement updateStmt = conn.prepareStatement(updateSql);
                 updateStmt.setInt(1, quantity);
                 updateStmt.setInt(2, cartItemId);
-                return updateStmt.executeUpdate() > 0;
+                int affected = updateStmt.executeUpdate();
+                System.out.println("[CartDAO] 更新购物车 - cartItemId: " + cartItemId + ", 新增数量: " + quantity + ", 受影响行数: " + affected);
+                return affected > 0;
             } else {
                 // 不存在，插入新记录
                 PreparedStatement insertStmt = conn.prepareStatement(insertSql);
                 insertStmt.setInt(1, userId);
                 insertStmt.setInt(2, productId);
                 insertStmt.setInt(3, quantity);
-                return insertStmt.executeUpdate() > 0;
+                int affected = insertStmt.executeUpdate();
+                System.out.println("[CartDAO] 插入购物车 - userId: " + userId + ", productId: " + productId + ", quantity: " + quantity + ", 受影响行数: " + affected);
+                return affected > 0;
             }
         } catch (SQLException e) {
+            System.err.println("[CartDAO] 数据库错误 - userId: " + userId + ", productId: " + productId + ", SQL错误: " + e.getMessage());
             e.printStackTrace();
             return false;
         }

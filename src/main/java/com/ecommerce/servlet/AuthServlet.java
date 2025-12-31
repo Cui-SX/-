@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import com.ecommerce.dao.SystemLogDAO;
 import com.ecommerce.dao.UserDAO;
 import com.ecommerce.model.User;
 
@@ -18,6 +19,7 @@ import com.ecommerce.model.User;
 @WebServlet("/auth")
 public class AuthServlet extends HttpServlet {
     private UserDAO userDAO = new UserDAO();
+    private SystemLogDAO systemLogDAO = new SystemLogDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
@@ -63,6 +65,10 @@ public class AuthServlet extends HttpServlet {
             session.setAttribute("username", user.getUsername());
             session.setAttribute("role", user.getRole());
             
+            // 记录登录日志
+            systemLogDAO.log(user.getId(), username, "LOGIN", "用户登录成功", 
+                request.getRemoteAddr(), request.getHeader("User-Agent"));
+            
             // 根据角色自动跳转
             if (user.isAdmin() || "sales_manager".equals(user.getRole())) {
                 // 管理员和销售经理跳转到管理后台
@@ -72,6 +78,9 @@ public class AuthServlet extends HttpServlet {
                 response.sendRedirect("products");
             }
         } else {
+            // 记录登录失败日志
+            systemLogDAO.log(null, username, "LOGIN_FAILED", "用户登录失败：用户名或密码错误", 
+                request.getRemoteAddr(), request.getHeader("User-Agent"));
             request.setAttribute("error", "用户名或密码错误");
             request.getRequestDispatcher("login.jsp").forward(request, response);
         }
@@ -110,6 +119,9 @@ public class AuthServlet extends HttpServlet {
         // 创建用户
         User user = new User(username, password, email, fullName);
         if (userDAO.register(user)) {
+            // 记录注册日志
+            systemLogDAO.log(null, username, "REGISTER", "新用户注册成功", 
+                request.getRemoteAddr(), request.getHeader("User-Agent"));
             request.setAttribute("success", "注册成功，请登录");
             request.getRequestDispatcher("login.jsp").forward(request, response);
         } else {
@@ -125,6 +137,13 @@ public class AuthServlet extends HttpServlet {
             throws IOException {
         HttpSession session = request.getSession(false);
         if (session != null) {
+            Integer userId = (Integer) session.getAttribute("userId");
+            String username = (String) session.getAttribute("username");
+            
+            // 记录登出日志
+            systemLogDAO.log(userId, username, "LOGOUT", "用户登出", 
+                request.getRemoteAddr(), request.getHeader("User-Agent"));
+            
             session.invalidate();
         }
         response.sendRedirect("login.jsp");

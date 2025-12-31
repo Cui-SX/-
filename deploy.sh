@@ -16,12 +16,40 @@ sudo mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_passwo
 
 # 导入数据
 echo "正在导入数据库结构..."
-# 确保 schema.sql 在当前目录下
+
+DB_USER="root"
+DB_PASS="Root123456"
+DB_NAME="ecommerce"
+
+# 检查并导入 schema.sql
 if [ -f "schema.sql" ]; then
-    sudo mysql -u root -pRoot123456 < schema.sql
+    echo "导入 schema.sql..."
+    sudo mysql -u $DB_USER -p$DB_PASS < schema.sql
+elif [ -f "database/schema.sql" ]; then
+    echo "导入 database/schema.sql..."
+    sudo mysql -u $DB_USER -p$DB_PASS < database/schema.sql
 else
-    echo "错误: 找不到 schema.sql 文件！"
-    exit 1
+    echo "警告: 找不到 schema.sql 文件，跳过基础表结构导入。"
+fi
+
+# 检查并导入 new_features.sql
+if [ -f "new_features.sql" ]; then
+    echo "导入 new_features.sql..."
+    sudo mysql -u $DB_USER -p$DB_PASS $DB_NAME < new_features.sql
+elif [ -f "database/new_features.sql" ]; then
+    echo "导入 database/new_features.sql..."
+    sudo mysql -u $DB_USER -p$DB_PASS $DB_NAME < database/new_features.sql
+else
+    echo "警告: 找不到 new_features.sql 文件，跳过新功能表导入。"
+fi
+
+# 检查并导入 add_sales_manager.sql
+if [ -f "add_sales_manager.sql" ]; then
+    echo "导入 add_sales_manager.sql..."
+    sudo mysql -u $DB_USER -p$DB_PASS $DB_NAME < add_sales_manager.sql
+elif [ -f "database/add_sales_manager.sql" ]; then
+    echo "导入 database/add_sales_manager.sql..."
+    sudo mysql -u $DB_USER -p$DB_PASS $DB_NAME < database/add_sales_manager.sql
 fi
 
 # 3. 部署 WAR 包

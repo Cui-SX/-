@@ -8,11 +8,14 @@
             <c:if test="${not empty sessionScope.user}">
                 <li><a href="${pageContext.request.contextPath}/cart">购物车</a></li>
                 <li><a href="${pageContext.request.contextPath}/order">我的订单</a></li>
+                <li><a href="${pageContext.request.contextPath}/history">浏览历史</a></li>
                 
                 <c:if test="${sessionScope.user.role == 'admin' || sessionScope.user.role == 'sales_manager'}">
                     <li><a href="${pageContext.request.contextPath}/admin/products">商品管理</a></li>
                     <li><a href="${pageContext.request.contextPath}/admin/orders">订单管理</a></li>
                     <li><a href="${pageContext.request.contextPath}/admin/stats">销售报表</a></li>
+                    <li><a href="${pageContext.request.contextPath}/admin/history">用户浏览</a></li>
+                    <li><a href="${pageContext.request.contextPath}/admin/logs">系统日志</a></li>
                 </c:if>
                 
                 <li>Welcome, ${sessionScope.user.fullName}</li>
